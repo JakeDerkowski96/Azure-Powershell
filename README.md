@@ -1,2 +1,2 @@
 # Azure-Powershell
- Powershel for Azure and more
+ Powershell for Azure and more
