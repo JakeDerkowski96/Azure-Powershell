@@ -1,3 +1,26 @@
+function Get-ResourceGroupbyRegion {
+    [CmdletBinding()]
+    param (
+        # User define the target
+        [Parameter(Mandatory=$True)]
+        [String]
+        $region
+    )
+    
+    begin {
+        Login-AzAccount | Out-Null
+        Write-Host "Gathering the resources located in: $region"
+    }
+    
+    process {
+        
+    }
+    
+    end {
+        
+    }
+}
+
 
 $ResultResources = @()
 $Subscriptions = Get-AzSubscription
