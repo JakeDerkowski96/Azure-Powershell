@@ -1,0 +1,40 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspace": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "properties": {
+                "category": "Hunting Queries",
+                "displayName": "Anomalous Code Execution",
+                "query": "let operations = dynamic(['Run Command on Virtual Machine']);\nBehaviorAnalytics\n| where ActionType in(operations)\n| where ActivityInsights has \"True\"\n| project TimeGenerated, UserName, UserPrincipalName, UsersInsights, ActivityType, ActionType,ActivityInsights ,SourceIPAddress, SourceIPLocation, SourceDevice, DevicesInsights\n| extend timestamp = TimeGenerated",
+                "tags": [
+                    {
+                        "name": "description",
+                        "value": ""
+                    },
+                    {
+                        "name": "tactics",
+                        "value": ""
+                    },
+                    {
+                        "name": "techniques",
+                        "value": ""
+                    },
+                    {
+                        "name": "jake.derkowski@5qcloud.com",
+                        "value": "true"
+                    }
+                ],
+                "version": 2
+            },
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/f8ab176c-1f3f-4cb5-8dc1-f50d30bcae0d')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/savedSearches",
+            "apiVersion": "2020-08-01"
+        }
+    ]
+}

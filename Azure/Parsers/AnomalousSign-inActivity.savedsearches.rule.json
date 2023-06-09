@@ -1,0 +1,40 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspace": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "properties": {
+                "category": "Hunting Queries",
+                "displayName": "Anomalous Sign-in Activity",
+                "query": "BehaviorAnalytics\n| where ActionType == \"Sign-in\"\n| where UsersInsights.IsNewAccount == True or UsersInsights.IsDormantAccount == True or ActivityInsights has \"True\"\n| join (\nSigninLogs | where Status.errorCode == 0 or Status.errorCode == 0 and RiskDetail != \"none\"\n) on $left.SourceRecordId == $right._ItemId\n| extend UserPrincipalName = iff(UserPrincipalName has \"#EXT#\",replace(\"_\",\"@\",tostring(split(UserPrincipalName, \"#\")[0])),UserPrincipalName),\nUserName = iff(UserName has \"#EXT#\",replace(\"_\",\"@\",tostring(split(UserPrincipalName, \"#\")[0])),UserName)\n| project TimeGenerated, UserName, UserPrincipalName, UsersInsights, ActivityType, ActionType,[\"Evidence\"]=ActivityInsights, ResourceDisplayName,AppDisplayName,SourceIPAddress, SourceIPLocation, SourceDevice, DevicesInsights\n| extend timestamp = TimeGenerated",
+                "tags": [
+                    {
+                        "name": "description",
+                        "value": ""
+                    },
+                    {
+                        "name": "tactics",
+                        "value": ""
+                    },
+                    {
+                        "name": "techniques",
+                        "value": ""
+                    },
+                    {
+                        "name": "jake.derkowski@5qcloud.com",
+                        "value": "true"
+                    }
+                ],
+                "version": 2
+            },
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/bb3bb9da-9598-4d1f-af78-7cc2fd413b0b')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/savedSearches",
+            "apiVersion": "2020-08-01"
+        }
+    ]
+}

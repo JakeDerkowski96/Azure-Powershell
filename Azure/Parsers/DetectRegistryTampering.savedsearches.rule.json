@@ -1,0 +1,23 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspace": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "properties": {
+                "category": "Forensic",
+                "displayName": "DetectRegistryTampering",
+                "query": "//Detect when a user or process attempts to tamper with Defender for Endpoint registry settings\r\nDeviceEvents\r\n| where ActionType == \"TamperingAttempt\"\r\n| extend OriginalRegistryValue = tostring(AdditionalFields.OriginalValue)\r\n| extend Status = tostring(AdditionalFields.Status)\r\n| extend TamperingAction = tostring(AdditionalFields.TamperingAction)\r\n| extend AttemptedRegistryValue = tostring(AdditionalFields.TamperingAttemptedValue)\r\n| extend TargetRegistryKey = tostring(AdditionalFields.Target)\r\n| where TamperingAction == \"RegistryModification\"\r\n| project\r\n    TimeGenerated,\r\n    DeviceName,\r\n    TamperingAction,\r\n    Status,\r\n    OriginalRegistryValue,\r\n    AttemptedRegistryValue,\r\n    TargetRegistryKey,\r\n    InitiatingProcessAccountName,\r\n    InitiatingProcessCommandLine",
+                "functionAlias": "DetectRegistryTampering",
+                "version": 2
+            },
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/bed6fd40-6efc-4d8b-b89e-3d7720df8187_detectregistrytampering')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/savedSearches",
+            "apiVersion": "2020-08-01"
+        }
+    ]
+}
