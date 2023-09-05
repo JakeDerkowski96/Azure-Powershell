@@ -13,4 +13,4 @@ ForEach ($group in $groups) {
         $resultsarray += $UserObject
     }
 }
-$resultsarray | Export-Csv -Encoding UTF8  -Delimiter ";" -Path "C:\scripts\output.csv" -NoTypeInformation
+$resultsarray | Export-Csv -Encoding UTF8  -Delimiter "," -Path "C:\scripts\output.csv" -NoTypeInformation
