@@ -20,5 +20,5 @@ Function Get-GroupMembers {
     $UserObject | add-member  -membertype NoteProperty -name "UserPrinicpalName" -Value $GroupDetails.UserPrincipalName
     $resultsarray += $UserObject
 
-    $resultsarray | Export-Csv -Encoding UTF8  -Delimiter ";" -Path $ResultsPath -NoTypeInformation
+    $resultsarray | Export-Csv -Encoding UTF8  -Delimiter "," -Path $ResultsPath -NoTypeInformation
 }
