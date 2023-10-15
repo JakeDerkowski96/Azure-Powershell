@@ -1,9 +1,9 @@
-Function Connect-IPPSSession {
+Function Connect-Exchange {
     Param (
         [Parameter()][string]$ModuleName = "ExchangeOnlineManagement"
     )    
-    Import-Module $ModuleName
+    Import-Module $ModuleName | Out-Null
     Write-Verbose -Message "Connecting to $($ModuleName) with currentuser"
     $user = "$($env:username)@$($USERDNSDOMAIN)"
-    Connect-IPPSSession -UserPrincipalName $user | Out-Null
+    Connect-Exchange -UserPrincipalName $user | Out-Null
 }
