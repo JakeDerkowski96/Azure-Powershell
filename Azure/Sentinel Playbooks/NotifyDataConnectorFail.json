@@ -20,12 +20,13 @@
     },
     "parameters": {
         "PlaybookName": {
-            "defaultValue": "Restrict-MDEIpAddress-incident",
+            "defaultValue": "NotifyDataConnectorFail",
             "type": "string"
         }
     },
     "variables": {
-        "MicrosoftSentinelConnectionName": "[concat('MicrosoftSentinel-', parameters('PlaybookName'))]"
+        "MicrosoftSentinelConnectionName": "[concat('MicrosoftSentinel-', parameters('PlaybookName'))]",
+        "TeamsConnectionName": "[concat('Teams-', parameters('PlaybookName'))]"
     },
     "resources": [
         {
@@ -42,7 +43,7 @@
                         }
                     },
                     "triggers": {
-                        "Microsoft_Sentinel_incident": {
+                        "Microsoft_Sentinel_alert": {
                             "type": "ApiConnectionWebhook",
                             "inputs": {
                                 "body": {
@@ -53,81 +54,48 @@
                                         "name": "@parameters('$connections')['azuresentinel']['connectionId']"
                                     }
                                 },
-                                "path": "/incident-creation"
+                                "path": "/subscribe"
                             }
                         }
                     },
                     "actions": {
-                        "Entities_-_Get_IPs": {
+                        "Alert_-_Get_incident": {
                             "runAfter": {},
                             "type": "ApiConnection",
                             "inputs": {
-                                "body": "@triggerBody()?['object']?['properties']?['relatedEntities']",
                                 "host": {
                                     "connection": {
                                         "name": "@parameters('$connections')['azuresentinel']['connectionId']"
                                     }
                                 },
-                                "method": "post",
-                                "path": "/entities/ip"
+                                "method": "get",
+                                "path": "/Incidents/subscriptions/@{encodeURIComponent(triggerBody()?['WorkspaceSubscriptionId'])}/resourceGroups/@{encodeURIComponent(triggerBody()?['WorkspaceResourceGroup'])}/workspaces/@{encodeURIComponent(triggerBody()?['WorkspaceId'])}/alerts/@{encodeURIComponent(triggerBody()?['SystemAlertId'])}"
                             }
                         },
-                        "For_each": {
-                            "foreach": "@body('Entities_-_Get_IPs')?['IPs']",
-                            "actions": {
-                                "Add_comment_to_incident_(V3)": {
-                                    "runAfter": {
-                                        "HTTP": [
-                                            "Succeeded"
-                                        ]
-                                    },
-                                    "type": "ApiConnection",
-                                    "inputs": {
-                                        "body": {
-                                            "incidentArmId": "@triggerBody()?['object']?['id']",
-                                            "message": "<p>@{items('For_each')?['Address']} was added to MDE Indicators with action: AlertandBlock via playbook.</p>"
-                                        },
-                                        "host": {
-                                            "connection": {
-                                                "name": "@parameters('$connections')['azuresentinel']['connectionId']"
-                                            }
-                                        },
-                                        "method": "post",
-                                        "path": "/Incidents/Comment"
-                                    }
-                                },
-                                "HTTP": {
-                                    "runAfter": {},
-                                    "type": "Http",
-                                    "inputs": {
-                                        "authentication": {
-                                            "audience": "https://api.securitycenter.windows.com",
-                                            "type": "ManagedServiceIdentity"
-                                        },
-                                        "body": {
-                                            "action": "AlertAndBlock",
-                                            "application": "Azure Sentinel",
-                                            "description": "@{triggerBody()?['object']?['properties']?['incidentNumber']}-@{triggerBody()?['object']?['properties']?['title']}",
-                                            "expirationTime": "@{addDays(string(triggerbody()['TimeGenerated']), 90)}",
-                                            "indicatorType": "IpAddress",
-                                            "indicatorValue": "@{items('For_each')?['Address']}",
-                                            "severity": "@{triggerBody()?['object']?['properties']?['severity']}",
-                                            "title": "@{guid()}"
-                                        },
-                                        "headers": {
-                                            "Content-type": "application/json"
-                                        },
-                                        "method": "POST",
-                                        "uri": "https://api.securitycenter.windows.com/api/indicators"
-                                    }
-                                }
-                            },
+                        "Post_message_in_a_chat_or_channel": {
                             "runAfter": {
-                                "Entities_-_Get_IPs": [
+                                "Alert_-_Get_incident": [
                                     "Succeeded"
                                 ]
                             },
-                            "type": "Foreach"
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "body": {
+                                    "messageBody": "<p>Severity: @{triggerBody()?['Severity']}<br>\nTItle: @{body('Alert_-_Get_incident')?['properties']?['title']}<br>\nStatus: @{body('Alert_-_Get_incident')?['properties']?['status']}<br>\nID: @{body('Alert_-_Get_incident')?['properties']?['incidentNumber']}<br>\nURL: @{body('Alert_-_Get_incident')?['properties']?['incidentUrl']}<br>\n</p>",
+                                    "recipient": {
+                                        "channelId": "19:e965270be0b74d78bbcd249f0c798346@thread.tacv2",
+                                        "groupId": "31b9af4e-30d6-4bce-826d-7723dffda48e"
+                                    },
+                                    "subject": "Resource failure: @{body('Alert_-_Get_incident')?['properties']?['title']}"
+                                },
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['teams']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "path": "/beta/teams/conversation/message/poster/@{encodeURIComponent('User')}/location/@{encodeURIComponent('Channel')}"
+                            }
                         }
                     },
                     "outputs": {}
@@ -144,6 +112,11 @@
                                         "type": "ManagedServiceIdentity"
                                     }
                                 }
+                            },
+                            "teams": {
+                                "connectionId": "[resourceId('Microsoft.Web/connections', variables('TeamsConnectionName'))]",
+                                "connectionName": "[variables('TeamsConnectionName')]",
+                                "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/Teams')]"
                             }
                         }
                     }
@@ -153,9 +126,9 @@
             "type": "Microsoft.Logic/workflows",
             "location": "[resourceGroup().location]",
             "tags": {
-                "LogicAppsCategory": "security",
-                "AutomationRule": "Respond-BlockEntity",
-                "hidden-SentinelTemplateName": "Restrict-MDEIpAddress-incident",
+                "AutomationRule": "Notify-ResourceHealth",
+                "ATTN": "FINISH-ME!",
+                "hidden-SentinelTemplateName": "NotifyDataConnectorFail",
                 "hidden-SentinelTemplateVersion": "1.0"
             },
             "identity": {
@@ -163,7 +136,8 @@
             },
             "apiVersion": "2017-07-01",
             "dependsOn": [
-                "[resourceId('Microsoft.Web/connections', variables('MicrosoftSentinelConnectionName'))]"
+                "[resourceId('Microsoft.Web/connections', variables('MicrosoftSentinelConnectionName'))]",
+                "[resourceId('Microsoft.Web/connections', variables('TeamsConnectionName'))]"
             ]
         },
         {
@@ -178,6 +152,20 @@
                 "parameterValueType": "Alternative",
                 "api": {
                     "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/Azuresentinel')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Web/connections",
+            "apiVersion": "2016-06-01",
+            "name": "[variables('TeamsConnectionName')]",
+            "location": "[resourceGroup().location]",
+            "kind": "V1",
+            "properties": {
+                "displayName": "[variables('TeamsConnectionName')]",
+                "customParameterValues": {},
+                "api": {
+                    "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/Teams')]"
                 }
             }
         }
