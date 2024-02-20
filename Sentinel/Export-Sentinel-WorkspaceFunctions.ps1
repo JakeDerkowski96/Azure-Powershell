@@ -18,9 +18,8 @@ $destSubscriptionId = Read-Host
 
 
 
-Set-AzContext -Subscription "<Dest Subscription>"
-$ResourceGroup = "<Dest RG>"
-$WorkspaceName = "<Dest WorkSpace"
+Set-AzContext -Subscription $SubscriptionId
+
 
 # Import Saved Searches
 foreach ($search in $ExportedSearches) {
