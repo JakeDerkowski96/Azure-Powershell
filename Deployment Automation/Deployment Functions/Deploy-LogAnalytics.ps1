@@ -1,3 +1,4 @@
+# requires Az.OperationalInsights
 Function Deploy-LogAnalytics{
     Param(
         [Parameter(Mandatory)][string]$ResourceGroupName,
@@ -7,6 +8,7 @@ Function Deploy-LogAnalytics{
         # or [Parameter(Mandatory)][string]$ResourceId
     )
 }
+
 
 
 # create log analytics workspace

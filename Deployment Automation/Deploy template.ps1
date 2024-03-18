@@ -17,7 +17,7 @@ if ($notPresent) {
     
     New-AzResourceGroup -Name $ResourceGroup `
         -Location $Location `
-        -Verbose
+        # -Verbose
 }
 # END OF CHECK-AZRG FUNCTION
 

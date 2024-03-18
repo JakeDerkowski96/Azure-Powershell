@@ -14,6 +14,6 @@ $DeploymentName = "ResourceName_" + $deploySuffix
 
 New-AzResourceGroupDeployment `
     -Name $DeploymentName `
-    -ResourceGroupName ExampleGroup `
+    -ResourceGroupName $ResourceGroup `
     -TemplateFile $ARMTemplatePath `
     -TemplateParameterFile $CustomParameters
