@@ -1,14 +1,14 @@
 # Enable-AzSentienlRuleTemplates.ps1
 
 $Tenant = @{
-    Tenant         = "Tenantsec.com"
+    Tenant         = ""
     TenantId       = ""
-    Workspace      = "law-siem01"
+    Workspace      = ""
     WorkspaceId    = ""
-    ResourceGroup  = "rg-logs"
-    Subscription   = "Tenant Trial Subscription"
+    ResourceGroup  = ""
+    Subscription   = ""
     SubscriptionId = ""
-    ResourceId     = "Sentinel ResourceId"
+    ResourceId     = ""
 }
 
 Import-Module Az.Accounts

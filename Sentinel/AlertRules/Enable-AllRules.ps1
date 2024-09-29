@@ -26,4 +26,5 @@ foreach($rule in $AllRules){
         "MicrosoftSecurityIncidentCreation" {
             Update-AzSentinelAlertRule @SentinelParams -RuleId $rule.Id -MicrosoftSecurityIncidentCreation -Enabled
         }
+    }
 }

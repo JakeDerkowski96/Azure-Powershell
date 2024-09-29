@@ -200,7 +200,6 @@ Function Download-SentinelArtifacts {
 				$WorkspaceDirectory = New-Item -Path $FolderName -Name $LogAnalyticsWorkspaceName -ItemType "directory"
 			}                                                           
 			
-			                              
             if (Test-Path "$WorkspaceDirectory/$ArtifactType") {
                 $LocalArtifactsDirectory = "$WorkspaceDirectory/$ArtifactType"
             }
