@@ -14,5 +14,11 @@ Set-AzContext -Subscription $SubscriptionId
 # Import Saved Searches
 foreach ($search in $ExportedSearches) {
     $id = $search.Category + "|" + $search.DisplayName
-    New-AzOperationalInsightsSavedSearch -Force -ResourceGroupName $ResourceGroup -WorkspaceName $WorkspaceName -SavedSearchId $id -DisplayName $search.DisplayName -Category $search.Category -Query $search.Query -Version $search.Version
+    New-AzOperationalInsightsSavedSearch -Force -ResourceGroupName $ResourceGroup `
+                -WorkspaceName $WorkspaceName `
+                -SavedSearchId $id `
+                -DisplayName $search.DisplayName `
+                -Category $search.Category `
+                -Query $search.Query `
+                -Version $search.Version
 }
