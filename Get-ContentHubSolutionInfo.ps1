@@ -1,20 +1,17 @@
-function Check-AzConnection {
-    if ($null -eq $(Get-AzContext)) {
+function Get-AzConnection {
+    if ($null -ne $(Get-AzContext)) {
+        $azContext = Get-AzContext        
+        Write-Host -ForegroundColor Green "A connection has already been established with $($azContext.Account.Type) to $($azContext.Account.Id)"        
+    }else {
         try {
             $Conn = Connect-AzAccount
-            if ($null -ne $Conn) {
-                Write-Host -ForegroundColor "Successful authenticated with $($conn.Context.Account.Id)"                
+            if($null -ne $Conn){
+                Write-Host -ForegroundColor Green "Sucessful authentication to Azure "
             }
-            else {
-                Write-Host -ForegroundColor Red "Failed to authenticate to Azure"
-            }
+        }catch {
+            Write-Host -ForegroundColor Red "Failed to authenticate to Azure  with $($conn.Account.Type) to $($conn.Account.Id)"
+            Exit
         }
-        catch {
-            Write-Host -ForegroundColor Red "Failed to authenticate to Azure"
-        }        
-    }
-    else {
-        Write-Host -ForegroundColor Green "A connection has already been established with $($conn.Context.Account.Type) to $($conn.Context.Account.Id)"
     }
 }
 
@@ -31,12 +28,13 @@ function Install-Module-If-Needed {
     }
 }
 
+$VerbosePreference = 'Continue'
+
 Install-Module-If-Needed -ModuleName "Az.Accounts"
 
 # Connect if not connected
-Check-AzConnection
+Get-AzConnection
 
-$
 
 #! Get Az Access Token
 $token = Get-AzAccessToken #This will default to Azure Resource Manager endpoint
