@@ -41,8 +41,8 @@ Import-Module -Name AzureAD
 Connect-AzureADIfNotConnected -Verbose
 
 # Create an Azure AD Application (Service Principal)
-$applicationName = "Sentinel_SP"
-$password = ConvertTo-SecureString -String "Password123" -AsPlainText -Force
+$applicationName = "Sentinel_Management"
+$password = ConvertTo-SecureString -String "xpJnMq_w8HdPz-beaP" -AsPlainText -Force
 $application = New-AzADApplication -DisplayName $applicationName 
 New-AzADServicePrincipal -ApplicationId $application.ApplicationId
 

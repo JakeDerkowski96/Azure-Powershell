@@ -593,7 +593,7 @@ foreach($GetSubscription in $GetSubscriptions) {
                         })
                     }
                 }
-                               
+
                 # Add changes for API connection resources
                 Foreach ($apiConnectionReference in $playbookResource.properties.parameters.'$connections'.value.PsObject.Properties) {
                     HandlePlaybookApiConnectionReference -apiConnectionReference $apiConnectionReference -playbookResource $playbookResource
